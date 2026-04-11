@@ -22,18 +22,29 @@ flag						| description						| default
 `--enableFileNotFound`		| enable file-not-found error		| `true`
 `--fileNotFoundFile`		| set custom file-not-found file	| `404.html`
 
-# docker
-- sample [Dockerfile](./sysadmin/Dockerfile)
-```bash
-docker build -f sysadmin/Dockerfile -t simple-http-fileserver .
-docker run --rm -p 64080:64080 -v /path/to/your/folder:/var/www:ro simple-http-fileserver
+# install from releases
+```sh
+# linux amd64 version
+sudo bash -c 'VERSION=2026.04.11; ARCH=aarch64; curl -L -o /usr/local/bin/simple-http-fileserver "https://github.com/codemodify/simple-http-fileserver/releases/download/${VERSION}/simple-http-fileserver_linux-${ARCH}"'
+
+sudo chmod +x /usr/local/bin/simple-http-fileserver
+
+/usr/local/bin/simple-http-fileserver -version
 ```
+
 # systemd
 - sample [simple-http-fileserver.service](./sysadmin/simple-http-fileserver.service)
 ```bash
 sudo cp sysadmin/simple-http-fileserver.service /etc/systemd/system/simple-http-fileserver.service
 sudo systemctl daemon-reload
 sudo systemctl enable --now simple-http-fileserver
+```
+
+# docker
+- sample [Dockerfile](./sysadmin/Dockerfile)
+```bash
+docker build -f sysadmin/Dockerfile -t simple-http-fileserver .
+docker run --rm -p 64080:64080 -v /path/to/your/folder:/var/www:ro simple-http-fileserver
 ```
 
 # design considerations
