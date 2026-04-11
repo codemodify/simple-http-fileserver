@@ -1,0 +1,17 @@
+[Unit]
+Description=simple-http-fileserver
+Documentation=https://github.com/codemodify/simple-http-fileserver
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/simple-http-fileserver
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+ExecStart=/usr/bin/env simple-http-fileserver --folder /var/www/site1
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
