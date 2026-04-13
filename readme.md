@@ -17,6 +17,14 @@ sudo systemctl daemon-reload && sudo systemctl enable simple-http-fileserver && 
 ```
 
 
+# install - docker
+- use this [Dockerfile](./sysadmin/Dockerfile)
+```bash
+docker build -f sysadmin/Dockerfile -t simple-http-fileserver .
+docker run --rm -p 64080:64080 -v /path/to/your/folder:/var/www:ro simple-http-fileserver
+```
+
+
 # config
 flag						| description						| default
 ----						|----								|----
@@ -30,14 +38,6 @@ flag						| description						| default
 `--enableDirListing`		| enable directory listing			| `false`
 `--enableFileNotFound`		| enable file-not-found error		| `true`
 `--fileNotFoundFile`		| set custom file-not-found file	| `404.html`
-
-
-# install - docker
-- use this [Dockerfile](./sysadmin/Dockerfile)
-```bash
-docker build -f sysadmin/Dockerfile -t simple-http-fileserver .
-docker run --rm -p 64080:64080 -v /path/to/your/folder:/var/www:ro simple-http-fileserver
-```
 
 
 # local dev
