@@ -13,4 +13,4 @@ USER nobody
 VOLUME ["/var/www"]
 
 EXPOSE 64080
-ENTRYPOINT ["simple-http-fileserver", "--folder", "/var/www", "--enableHTTP", "--httpOn", ":64080"]
+ENTRYPOINT ["simple-http-fileserver", "--folder", "/var/www", "--enable-http", "--http-on", ":64080"]

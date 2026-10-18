@@ -252,3 +252,16 @@ func mustWriteFile(t *testing.T, path, contents string) {
 		t.Fatalf("write %s: %v", path, err)
 	}
 }
+
+func TestPulse(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "pulse"), []byte("a file"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	handler := withPulse(newFileHandler(dir, false, true, "404.html"))
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/pulse", nil))
+	if rec.Code != http.StatusOK || rec.Body.String() != banner+" "+version+"\n" {
+		t.Fatalf("/pulse = %d %q", rec.Code, rec.Body.String())
+	}
+}

@@ -2,6 +2,7 @@
 - a tiny static file server, binary is 2.3MB
 - serves index.html over HTTP or HTTPS + custom `404.html` if needed
 - opt-in folder listing, large files + resume downloads
+- `/pulse` answers with the name and version, for health checks
 
 # install - binary + systemd
 - use this systemd [simple-http-fileserver.service](./sysadmin/simple-http-fileserver.service)
@@ -29,20 +30,20 @@ docker run --rm -p 64080:64080 -v /path/to/your/folder:/var/www:ro simple-http-f
 flag						| description						| default
 ----						|----								|----
 `--folder`					| folder to serve 					| current working directory
-`--enableHTTP`				| enable the HTTP listener			| `true`
-`--httpOn`					| HTTP bind address					| `127.0.0.1:64080`
-`--enableHTTPS`				| enable the HTTPS listener			| `false`
-`--httpsOn`					| HTTPS bind address				| `127.0.0.1:64443`
-`--httpsCert`				| TLS certificate path				|
-`--httpsKey`				| TLS private key path				|
-`--enableDirListing`		| enable directory listing			| `false`
-`--enableFileNotFound`		| enable file-not-found error		| `true`
-`--fileNotFoundFile`		| set custom file-not-found file	| `404.html`
+`--enable-http`				| enable the HTTP listener			| `true`
+`--http-on`					| HTTP bind address					| `127.0.0.1:64080`
+`--enable-https`			| enable the HTTPS listener			| `false`
+`--https-on`				| HTTPS bind address				| `127.0.0.1:64043`
+`--https-cert`				| TLS certificate path				|
+`--https-key`				| TLS private key path				|
+`--enable-dir-listing`		| enable directory listing			| `false`
+`--enable-file-not-found`	| enable file-not-found error		| `true`
+`--file-not-found-file`		| set custom file-not-found file	| `404.html`
 
 
 # local dev
-- `go run . --folder . --enableHTTP  --httpOn  :64080`
-- `go run . --folder . --enableHTTPS --httpsOn :64443 --httpsCert ./server.crt --httpsKey ./server.key`
+- `go run . --folder . --enable-http  --http-on  :64080`
+- `go run . --folder . --enable-https --https-on :64043 --https-cert ./server.crt --https-key ./server.key`
 
 
 # design considerations

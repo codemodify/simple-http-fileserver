@@ -7,7 +7,7 @@ After=network.target
 Type=simple
 WorkingDirectory=/var/www/simple-http-fileserver
 Environment=PATH=/usr/local/bin:/usr/bin:/bin
-ExecStart=/usr/bin/env simple-http-fileserver --folder /var/www/site1 --httpOn "127.0.0.1:64080"
+ExecStart=/usr/bin/env simple-http-fileserver --folder /var/www/site1 --http-on "127.0.0.1:64080"
 Restart=on-failure
 RestartSec=10
 StandardOutput=journal

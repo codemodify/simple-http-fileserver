@@ -16,8 +16,14 @@ import (
 var version = "dev"
 
 const (
+	banner = "codemodify/simple-http-fileserver"
+
+	// pulsePath answers with the banner and version. It touches neither the
+	// folder nor the disk, so it is cheap enough to poll.
+	pulsePath = "/pulse"
+
 	defaultHTTPOn  = "127.0.0.1:64080"
-	defaultHTTPSOn = "127.0.0.1:64443"
+	defaultHTTPSOn = "127.0.0.1:64043"
 )
 
 func init() {
@@ -34,17 +40,17 @@ func main() {
 	showVersion := flag.Bool("version", false, "print version and exit")
 	folder := flag.String("folder", workFolder, "folder")
 
-	enableHTTP := flag.Bool("enableHTTP", true, "enable HTTP")
-	httpOn := flag.String("httpOn", defaultHTTPOn, "http On")
+	enableHTTP := flag.Bool("enable-http", true, "enable HTTP listener")
+	httpOn := flag.String("http-on", defaultHTTPOn, "HTTP bind address")
 
-	enableHTTPS := flag.Bool("enableHTTPS", false, "enable HTTPS")
-	httpsOn := flag.String("httpsOn", defaultHTTPSOn, "https On")
-	httpsCert := flag.String("httpsCert", "", "https Cert")
-	httpsKey := flag.String("httpsKey", "", "https Key")
+	enableHTTPS := flag.Bool("enable-https", false, "enable HTTPS listener")
+	httpsOn := flag.String("https-on", defaultHTTPSOn, "HTTPS bind address")
+	httpsCert := flag.String("https-cert", "", "HTTPS Cert")
+	httpsKey := flag.String("https-key", "", "HTTPS Key")
 
-	enableDirListing := flag.Bool("enableDirListing", false, "enable directory listing")
-	enableFileNotFound := flag.Bool("enableFileNotFound", true, "enable 404 page")
-	fileNotFoundFile := flag.String("fileNotFoundFile", "404.html", "fallback file")
+	enableDirListing := flag.Bool("enable-dir-listing", false, "enable directory listing")
+	enableFileNotFound := flag.Bool("enable-file-not-found", true, "serve --file-not-found-file for a missing file")
+	fileNotFoundFile := flag.String("file-not-found-file", "404.html", "the not-found page, relative to --folder")
 
 	flag.Parse()
 
@@ -57,7 +63,7 @@ func main() {
 		logError("%v", err)
 	}
 
-	handler := accessLog(newFileHandler(*folder, *enableDirListing, *enableFileNotFound, *fileNotFoundFile))
+	handler := accessLog(withPulse(newFileHandler(*folder, *enableDirListing, *enableFileNotFound, *fileNotFoundFile)))
 
 	if *enableHTTP {
 		logInfo("listen | http://%s", *httpOn)
@@ -132,19 +138,32 @@ func main() {
 
 func validateServerConfig(enableHTTP, enableHTTPS bool, httpsCert, httpsKey string) error {
 	if !enableHTTP && !enableHTTPS {
-		return errors.New("either '--enableHTTP' or '--enableHTTPS' is required")
+		return errors.New("either '--enable-http' or '--enable-https' is required")
 	}
 
 	if enableHTTPS {
 		if httpsCert == "" {
-			return errors.New("'--httpsCert' is required when '--enableHTTPS' is set")
+			return errors.New("'--https-cert' is required when '--enable-https' is set")
 		}
 		if httpsKey == "" {
-			return errors.New("'--httpsKey' is required when '--enableHTTPS' is set")
+			return errors.New("'--https-key' is required when '--enable-https' is set")
 		}
 	}
 
 	return nil
+}
+
+// withPulse answers pulsePath ahead of the files, so a file named "pulse" at
+// the top of --folder is not served.
+func withPulse(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == pulsePath {
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			fmt.Fprintf(w, "%s %s\n", banner, version)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func newFileHandler(folder string, enableDirListing bool, enableFileNotFound bool, fileNotFoundFile string) http.Handler {
@@ -307,11 +326,11 @@ func (rec *statusRecorder) Write(b []byte) (int, error) {
 }
 
 func logInfo(format string, v ...interface{}) {
-	log.Default().Printf("I | %s | %s | %s \n", version, timeNowAsString(), fmt.Sprintf(format, v...))
+	log.Default().Printf("I | %s | %s | %s | %s \n", banner, version, timeNowAsString(), fmt.Sprintf(format, v...))
 }
 
 func logError(format string, v ...interface{}) {
-	log.Default().Fatalf("E | %s | %s | %s \n", version, timeNowAsString(), fmt.Sprintf(format, v...))
+	log.Default().Fatalf("E | %s | %s | %s | %s \n", banner, version, timeNowAsString(), fmt.Sprintf(format, v...))
 }
 
 func timeNowAsString() string {
